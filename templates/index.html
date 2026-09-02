@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Ranker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+    <div class="hero">
+        <h1>AI Resume Ranker</h1>
+        <p>Rank candidates automatically using NLP, TF-IDF and cosine similarity.</p>
+    </div>
+
+    <div class="card">
+        <form method="POST" enctype="multipart/form-data">
+            <label>Job Description</label>
+            <textarea name="job_description" rows="9"
+                placeholder="Example: We are looking for a Python developer with experience in Flask, SQL, machine learning and REST APIs.">{{ job_description }}</textarea>
+
+            <label>Upload Resume PDFs</label>
+            <input type="file" name="resumes" accept=".pdf" multiple>
+
+            <button type="submit">Rank Candidates</button>
+        </form>
+    </div>
+
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
+    {% if results %}
+    <div class="card">
+        <h2>Candidate Rankings</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Resume</th>
+                    <th>Match Score</th>
+                    <th>Matched Keywords</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for result in results %}
+                <tr>
+                    <td><span class="rank">#{{ result.rank }}</span></td>
+                    <td>{{ result.filename }}</td>
+                    <td>
+                        <div class="score">{{ result.score }}%</div>
+                        <div class="bar">
+                            <div style="width: {{ result.score }}%"></div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if result.skills %}
+                            {% for skill in result.skills %}
+                                <span class="tag">{{ skill }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <span>No direct keyword matches</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div class="info">
+        <h3>How it works</h3>
+        <p>PDF text extraction → spaCy preprocessing → TF-IDF vectorization → cosine similarity → candidate ranking.</p>
+    </div>
+</div>
+</body>
+</html>
